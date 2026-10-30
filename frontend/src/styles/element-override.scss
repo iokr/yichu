@@ -1,0 +1,109 @@
+// Element Plus 主题覆盖：仅用 Form 校验、DatePicker、Dialog、Message
+:root {
+  --el-color-primary: #a67c89;
+  --el-color-primary-light-3: #bfa0aa;
+  --el-color-primary-light-5: #d3bcc3;
+  --el-color-primary-light-7: #e6d8dc;
+  --el-color-primary-light-8: #efe5e8;
+  --el-color-primary-light-9: #f5edef;
+  --el-color-primary-dark-2: #94697a;
+  --el-color-success: #6e9c7c;
+  --el-color-warning: #d1a055;
+  --el-color-danger: #c06c6c;
+  --el-color-info: #7c93ae;
+
+  --el-border-radius-base: 12px;
+  --el-border-radius-small: 8px;
+  --el-font-family: var(--font-sans);
+  --el-text-color-primary: var(--color-text);
+  --el-text-color-regular: var(--color-text-2);
+  --el-text-color-placeholder: var(--color-text-3);
+  --el-border-color: var(--color-border);
+  --el-border-color-light: var(--color-border);
+  --el-fill-color-blank: var(--color-surface);
+  --el-bg-color: var(--color-surface);
+  --el-bg-color-overlay: var(--color-surface);
+  --el-mask-color: rgba(31, 29, 27, 0.32);
+
+  .el-input__wrapper,
+  .el-textarea__inner {
+    background: var(--color-surface-2);
+    box-shadow: none;
+    border-radius: var(--radius-md);
+  }
+
+  .el-input__wrapper.is-focus,
+  .el-textarea__inner:focus {
+    box-shadow: 0 0 0 2px var(--color-primary) inset;
+  }
+
+  .el-input__inner {
+    height: 40px;
+  }
+
+  .el-dialog {
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    background: var(--color-surface);
+  }
+
+  .el-popper {
+    border-radius: var(--radius-md) !important;
+  }
+
+  .el-message {
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+  }
+
+  .el-message-box {
+    border-radius: var(--radius-lg);
+  }
+}
+
+html.dark {
+  --el-bg-color: var(--color-surface);
+  --el-bg-color-overlay: var(--color-surface);
+  --el-fill-color-blank: var(--color-surface);
+  --el-fill-color-light: var(--color-surface-2);
+  --el-fill-color: var(--color-surface-2);
+  --el-border-color: var(--color-border);
+  --el-border-color-light: var(--color-border);
+  --el-text-color-primary: var(--color-text);
+  --el-text-color-regular: var(--color-text-2);
+  --el-text-color-placeholder: var(--color-text-3);
+  --el-mask-color: rgba(0, 0, 0, 0.6);
+}
+
+// 电脑端衣物表格：无阴影、1px 边框、表头浅底（与卡片一致）
+.items-table {
+  --el-table-border-color: var(--color-border);
+  --el-table-border: 1px solid var(--color-border);
+  --el-table-bg-color: var(--color-surface);
+  --el-table-tr-bg-color: var(--color-surface);
+  --el-table-header-bg-color: var(--color-surface-2);
+  --el-table-header-text-color: var(--color-text-3);
+  --el-table-row-hover-bg-color: var(--color-surface-2);
+  --el-table-text-color: var(--color-text-2);
+  --el-table-expanded-cell-bg-color: var(--color-surface);
+  font-size: 13px;
+
+  th.el-table__cell {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 0;
+  }
+
+  td.el-table__cell {
+    padding: 6px 0;
+  }
+
+  .cell {
+    padding: 0 10px;
+  }
+
+  &::before,
+  .el-table__inner-wrapper::before {
+    display: none;
+  }
+}

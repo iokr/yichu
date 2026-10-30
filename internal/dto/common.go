@@ -1,0 +1,9 @@
+package dto
+
+// PageResult 统一分页响应。
+type PageResult[T any] struct {
+	List  []T   `json:"list"`
+	Total int64 `json:"total"`
+	Page  int   `json:"page"`
+	Size  int   `json:"size"`
+}

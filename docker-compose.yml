@@ -1,0 +1,45 @@
+services:
+  mysql:
+    image: mysql:8.4
+    restart: always
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_0900_ai_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: yichu
+      MYSQL_USER: yichu
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: Asia/Shanghai
+    volumes: [mysql_data:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      retries: 20
+
+  yichu:
+    image: yichu/yichu:1.5.0
+    build:
+      context: .
+    restart: always
+    depends_on:
+      mysql: { condition: service_healthy }
+    environment:
+      YICHU_APP_NAME: 衣橱
+      YICHU_SERVER_ADDR: ":8080"
+      YICHU_DATABASE_DSN: "yichu:${MYSQL_PASSWORD}@tcp(mysql:3306)/yichu?charset=utf8mb4&parseTime=True&loc=Local"
+      YICHU_AUTH_JWT_SECRET: ${JWT_SECRET}
+      YICHU_STORAGE_UPLOAD_DIR: /data/uploads
+      YICHU_LOG_FILE: /data/logs/yichu.log
+      TZ: Asia/Shanghai
+    volumes: [app_data:/data]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    depends_on: [yichu]
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes: { mysql_data: {}, app_data: {}, caddy_data: {}, caddy_config: {} }

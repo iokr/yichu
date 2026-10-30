@@ -1,0 +1,17 @@
+[Unit]
+Description=Yichu Wardrobe Manager
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/yichu
+ExecStart=/opt/yichu/yichu -c /opt/yichu/config.yaml
+Restart=always
+RestartSec=3
+User=yichu
+Environment=YICHU_SERVER_ADDR=:8080
+Environment=YICHU_STORAGE_UPLOAD_DIR=/data/uploads
+Environment=YICHU_LOG_FILE=/data/logs/yichu.log
+
+[Install]
+WantedBy=multi-user.target
