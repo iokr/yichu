@@ -1,0 +1,30 @@
+app:
+  name: "衣橱"
+  hide_price: false
+  price_toggle_require_password: false
+server:
+  addr: ":8088"
+  mode: "debug"            # debug | release
+  tls:
+    enabled: false
+    cert_file: ""
+    key_file: ""
+database:
+  driver: "mysql"
+  dsn: "root:root@tcp(127.0.0.1:3306)/yichu?charset=utf8mb4&parseTime=True&loc=Local&timeout=5s&readTimeout=30s&writeTimeout=30s"
+  max_open_conns: 25
+  max_idle_conns: 10
+  conn_max_lifetime_minutes: 30
+  auto_migrate: true
+auth:
+  jwt_secret: "change-me-in-production"
+  token_ttl_hours: 168
+  init_username: "admin"
+  init_password: "yichu123"
+storage:
+  upload_dir: "./uploads"
+  max_size_mb: 10
+  max_count: 5
+log:
+  level: "info"
+  file: "./logs/yichu.log"

@@ -42,8 +42,7 @@ web/dist/*
 /uploads/
 /logs/
 /data/
-.env
-/config.yaml
+
 .idea/
 .vscode/
 .DS_Store
