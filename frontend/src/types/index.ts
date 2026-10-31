@@ -15,7 +15,6 @@ export interface Meta {
   version: string
   buildTime: string
   hidePrice: boolean
-  pwaEnabled: boolean
 }
 
 export interface Dicts {
@@ -177,7 +176,6 @@ export interface SettingsData {
   app_name: string
   version: string
   build_time: string
-  pwa_enabled: boolean
 }
 
 export interface UploadResult {

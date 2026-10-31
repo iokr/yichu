@@ -80,9 +80,8 @@ func New(cfg *config.Config, db *gorm.DB, logger *logx.Logger) *gin.Engine {
 		middleware.AccessLogger(logger),
 	)
 
-	// 图片与 PWA manifest 走显式路由，不会被 SPA 回退拦截。
+	// 图片走显式路由，不会被 SPA 回退拦截。
 	r.StaticFS("/uploads", http.Dir(storage.Root()))
-	r.GET("/manifest.webmanifest", h.Manifest)
 
 	api := r.Group("/api/v1")
 	{

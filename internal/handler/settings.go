@@ -37,6 +37,5 @@ func (h *Handler) settingsResponse() dto.SettingsResponse {
 		AppName:                    h.deps.Config.App.Name,
 		Version:                    buildinfo.Version,
 		BuildTime:                  buildinfo.BuildTime,
-		PWAEnabled:                 true,
 	}
 }

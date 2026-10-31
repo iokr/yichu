@@ -66,12 +66,6 @@ async function load() {
   }
 }
 
-async function clearApiCache() {
-  if (!('caches' in window)) return
-  const names = await caches.keys()
-  await Promise.all(names.filter((name) => name.startsWith('api-data')).map((name) => caches.delete(name)))
-}
-
 async function toggleHidePrice(value: boolean) {
   if (!settings.value) return
   saving.value = true
@@ -79,8 +73,7 @@ async function toggleHidePrice(value: boolean) {
     const next = await updateSettings({ hide_price: value })
     settings.value = next
     meta.setHidePrice(next.hide_price)
-    await clearApiCache()
-    ElMessage.success(value ? '已隐藏价格，缓存已清除' : '已显示价格，缓存已清除')
+    ElMessage.success(value ? '已隐藏价格' : '已显示价格')
   } catch (err) {
     ElMessage.error(toErrorMessage(err))
   } finally {
@@ -104,10 +97,6 @@ async function clearLocal() {
   clearing.value = true
   try {
     await dict.ensure(true)
-    if ('caches' in window) {
-      const names = await caches.keys()
-      await Promise.all(names.map((name) => caches.delete(name)))
-    }
     ElMessage.success('本地缓存已刷新')
   } catch (err) {
     ElMessage.error(toErrorMessage(err))
@@ -172,7 +161,7 @@ onMounted(async () => {
           <div>
             <h2 class="text-[15px] font-semibold">价格可见性</h2>
             <p class="mt-1 text-[12px] leading-[20px] text-ink-3">
-              关闭后服务端不再返回真实金额，接口与导出都会脱敏。切换后会自动清理离线缓存。
+              关闭后服务端不再返回真实金额，接口与导出都会脱敏。
             </p>
           </div>
           <el-switch v-model="hidePrice" :loading="saving" />
@@ -210,8 +199,6 @@ onMounted(async () => {
           <dd class="text-right text-ink">v{{ settings.version }}</dd>
           <dt class="text-ink-3">构建时间</dt>
           <dd class="text-right text-ink">{{ formatDateTime(settings.build_time) }}</dd>
-          <dt class="text-ink-3">PWA</dt>
-          <dd class="text-right text-ink">{{ settings.pwa_enabled ? '已启用' : '未启用' }}</dd>
           <dt class="text-ink-3">当前账号</dt>
           <dd class="text-right text-ink">{{ auth.user?.nickname || auth.user?.username || '管理员' }}</dd>
         </dl>

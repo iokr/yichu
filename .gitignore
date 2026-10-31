@@ -29,21 +29,13 @@ go.work.sum
 .env
 
 # Editor/IDE
-# .idea/
-# .vscode/
+*.idea/
+*.vscode/
 
-/bin/
-*.exe
 frontend/node_modules/
 frontend/dist/
 web/dist/*
 !web/dist/.gitkeep
-*.db
-/uploads/
-/logs/
-/data/
 
-.idea/
-.vscode/
-.DS_Store
-
+cmd/yichu/logs
+cmd/yichu/uploads

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import ReloadPrompt from '@/components/ReloadPrompt.vue'
 </script>
 
 <template>
@@ -9,5 +8,4 @@ import ReloadPrompt from '@/components/ReloadPrompt.vue'
       <component :is="Component" />
     </Transition>
   </RouterView>
-  <ReloadPrompt />
 </template>

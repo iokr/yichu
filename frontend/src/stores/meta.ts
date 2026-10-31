@@ -8,7 +8,6 @@ const FALLBACK: Meta = {
   version: 'dev',
   buildTime: 'unknown',
   hidePrice: false,
-  pwaEnabled: true,
 }
 
 export const useMetaStore = defineStore('meta', () => {

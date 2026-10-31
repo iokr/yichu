@@ -7,7 +7,6 @@ type SettingsResponse struct {
 	AppName                    string `json:"app_name"`
 	Version                    string `json:"version"`
 	BuildTime                  string `json:"build_time"`
-	PWAEnabled                 bool   `json:"pwa_enabled"`
 }
 
 // SettingsUpdateRequest 设置更新，只更新显式传入的字段。
