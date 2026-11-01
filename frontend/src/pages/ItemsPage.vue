@@ -80,10 +80,29 @@ const filters = reactive({
   tag_id: undefined as number | undefined,
   status: '',
   season: '',
+  purchase_from: '',
+  purchase_to: '',
   sort: 'created_at',
   order: 'desc' as 'asc' | 'desc',
   page: 1,
   size: 20,
+})
+
+// 购买日期拆成「起 / 止」两个紧凑输入，清空或选择后立即重新查询。
+const purchaseFrom = computed<string>({
+  get: () => filters.purchase_from,
+  set: (value) => {
+    filters.purchase_from = value ?? ''
+    applyFilters()
+  },
+})
+
+const purchaseTo = computed<string>({
+  get: () => filters.purchase_to,
+  set: (value) => {
+    filters.purchase_to = value ?? ''
+    applyFilters()
+  },
 })
 
 const sortOptions = [
@@ -102,6 +121,8 @@ const hasFilter = computed(
     !!filters.tag_id ||
     !!filters.status ||
     !!filters.season ||
+    !!filters.purchase_from ||
+    !!filters.purchase_to ||
     filters.sort !== 'created_at' ||
     filters.order !== 'desc',
 )
@@ -116,6 +137,8 @@ function syncFromQuery() {
   filters.tag_id = q.tag_id ? Number(q.tag_id) : undefined
   filters.status = typeof q.status === 'string' ? q.status : ''
   filters.season = typeof q.season === 'string' ? q.season : ''
+  filters.purchase_from = typeof q.purchase_from === 'string' ? q.purchase_from : ''
+  filters.purchase_to = typeof q.purchase_to === 'string' ? q.purchase_to : ''
   filters.sort = typeof q.sort === 'string' ? q.sort : 'created_at'
   filters.order = q.order === 'asc' ? 'asc' : 'desc'
   filters.page = q.page ? Math.max(1, Number(q.page)) : 1
@@ -128,6 +151,8 @@ function syncToQuery() {
   if (filters.tag_id) query.tag_id = String(filters.tag_id)
   if (filters.status) query.status = filters.status
   if (filters.season) query.season = filters.season
+  if (filters.purchase_from) query.purchase_from = filters.purchase_from
+  if (filters.purchase_to) query.purchase_to = filters.purchase_to
   if (filters.sort !== 'created_at') query.sort = filters.sort
   if (filters.order !== 'desc') query.order = filters.order
   if (filters.page > 1) query.page = String(filters.page)
@@ -147,6 +172,8 @@ async function load() {
       tag_id: filters.tag_id,
       status: filters.status || undefined,
       season: filters.season || undefined,
+      purchase_from: filters.purchase_from || undefined,
+      purchase_to: filters.purchase_to || undefined,
       sort: filters.sort,
       order: filters.order,
       page: filters.page,
@@ -183,6 +210,8 @@ function resetFilters() {
   filters.tag_id = undefined
   filters.status = ''
   filters.season = ''
+  filters.purchase_from = ''
+  filters.purchase_to = ''
   filters.sort = 'created_at'
   filters.order = 'desc'
   applyFilters()
@@ -335,6 +364,8 @@ async function doExport(format: 'csv' | 'xlsx') {
         tag_id: filters.tag_id,
         status: filters.status || undefined,
         season: filters.season || undefined,
+        purchase_from: filters.purchase_from || undefined,
+        purchase_to: filters.purchase_to || undefined,
         sort: filters.sort,
         order: filters.order,
       },
@@ -495,6 +526,23 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         <el-select v-model="filters.season" placeholder="季节" clearable size="default" class="!w-[110px]" @change="applyFilters">
           <el-option v-for="opt in dict.seasons" :key="opt.code" :label="opt.label" :value="opt.code" />
         </el-select>
+        <el-date-picker
+          v-model="purchaseFrom"
+          type="date"
+          value-format="YYYY-MM-DD"
+          placeholder="购买起"
+          size="default"
+          class="filter-date !w-[126px]"
+        />
+        <span class="px-1 text-[12px] text-ink-3">至</span>
+        <el-date-picker
+          v-model="purchaseTo"
+          type="date"
+          value-format="YYYY-MM-DD"
+          placeholder="购买止"
+          size="default"
+          class="filter-date !w-[126px]"
+        />
         <el-select v-model="filters.sort" size="default" class="!w-[130px]" @change="applyFilters">
           <el-option v-for="opt in sortOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
         </el-select>

@@ -33,7 +33,10 @@ var exportHeader = []string{
 // Export 导出 CSV / Excel，价格列受脱敏约束。
 func (s *ItemService) Export(_ context.Context, q dto.ItemQuery, format string) (*ExportResult, error) {
 	q.Normalize()
-	query := s.repoQuery(q)
+	query, err := s.repoQuery(q)
+	if err != nil {
+		return nil, err
+	}
 	query.Page = 1
 	query.Size = 0
 

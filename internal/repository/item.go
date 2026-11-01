@@ -26,6 +26,8 @@ type ItemQuery struct {
 	MinPrice      *float64
 	MaxPrice      *float64
 	Year          *int
+	PurchaseFrom  *time.Time
+	PurchaseTo    *time.Time
 	Sort          string
 	Order         string
 	Page          int
@@ -109,6 +111,13 @@ func (r *ItemRepository) applyFilters(q *gorm.DB, f ItemQuery) *gorm.DB {
 	if f.Year != nil {
 		start := time.Date(*f.Year, 1, 1, 0, 0, 0, 0, time.Local)
 		q = q.Where("purchase_date >= ? AND purchase_date < ?", start, start.AddDate(1, 0, 0))
+	}
+	// purchase_date 为 DATE 类型，购买日期区间按闭区间直接比较。
+	if f.PurchaseFrom != nil {
+		q = q.Where("purchase_date >= ?", *f.PurchaseFrom)
+	}
+	if f.PurchaseTo != nil {
+		q = q.Where("purchase_date <= ?", *f.PurchaseTo)
 	}
 	return q
 }

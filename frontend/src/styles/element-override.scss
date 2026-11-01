@@ -75,6 +75,27 @@ html.dark {
   --el-mask-color: rgba(0, 0, 0, 0.6);
 }
 
+// 列表筛选行的紧凑日期输入：与旁边的下拉保持同一套白底描边风格
+.el-date-editor.filter-date {
+  .el-input__wrapper {
+    background: var(--color-surface);
+    box-shadow: 0 0 0 1px var(--color-border) inset;
+    padding: 1px 8px 1px 14px;
+  }
+
+  .el-input__prefix {
+    display: none;
+  }
+
+  .el-input__wrapper:hover {
+    box-shadow: 0 0 0 1px var(--color-text-3) inset;
+  }
+
+  .el-input__wrapper.is-focus {
+    box-shadow: 0 0 0 2px var(--color-primary) inset;
+  }
+}
+
 // 电脑端衣物表格：无阴影、1px 边框、表头浅底（与卡片一致）
 .items-table {
   --el-table-border-color: var(--color-border);

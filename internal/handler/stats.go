@@ -48,6 +48,17 @@ func (h *Handler) StatsByYear(c *gin.Context) {
 	response.OK(c, res)
 }
 
+// StatsByMonth 月度购买统计。
+func (h *Handler) StatsByMonth(c *gin.Context) {
+	year, _ := strconv.Atoi(c.DefaultQuery("year", "0"))
+	res, err := h.deps.Stats.ByMonth(c.Request.Context(), year)
+	if err != nil {
+		response.Fail(c, err)
+		return
+	}
+	response.OK(c, res)
+}
+
 // StatsBySeason 季节统计。
 func (h *Handler) StatsBySeason(c *gin.Context) {
 	res, err := h.deps.Stats.BySeason(c.Request.Context())

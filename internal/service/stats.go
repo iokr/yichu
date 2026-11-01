@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/iokr/yichu/internal/dto"
 	"github.com/iokr/yichu/internal/pkg/dict"
@@ -104,6 +106,33 @@ func (s *StatsService) ByYear(_ context.Context) ([]dto.KeyStat, error) {
 		return nil, errcode.Internal(err)
 	}
 	return s.toKeyStats(rows, total), nil
+}
+
+// ByMonth 按购买年月统计，返回该年 12 个月的分布，无购买记录的月份补零。
+func (s *StatsService) ByMonth(_ context.Context, year int) ([]dto.KeyStat, error) {
+	if year < 1900 || year > 9999 {
+		year = time.Now().Year()
+	}
+	rows, err := s.stats.ByMonth(year)
+	if err != nil {
+		return nil, errcode.Internal(err)
+	}
+	found := make(map[string]repository.GroupRow, len(rows))
+	var total int64
+	for _, row := range rows {
+		found[row.Key] = row
+		total += row.Count
+	}
+	filled := make([]repository.GroupRow, 0, 12)
+	for month := 1; month <= 12; month++ {
+		key := fmt.Sprintf("%04d-%02d", year, month)
+		if row, ok := found[key]; ok {
+			filled = append(filled, row)
+			continue
+		}
+		filled = append(filled, repository.GroupRow{Key: key, Label: fmt.Sprintf("%d 月", month)})
+	}
+	return s.toKeyStats(filled, total), nil
 }
 
 // BySeason 按季节统计（多选会分别计数）。

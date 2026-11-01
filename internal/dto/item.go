@@ -100,6 +100,8 @@ type ItemQuery struct {
 	MinPrice      *float64 `form:"min_price"`
 	MaxPrice      *float64 `form:"max_price"`
 	Year          *int     `form:"year"`
+	PurchaseFrom  string   `form:"purchase_from"`
+	PurchaseTo    string   `form:"purchase_to"`
 	Sort          string   `form:"sort"`
 	Order         string   `form:"order"`
 	Page          int      `form:"page"`
@@ -120,6 +122,8 @@ func (q *ItemQuery) Normalize() {
 	q.Keyword = strings.TrimSpace(q.Keyword)
 	q.Brand = strings.TrimSpace(q.Brand)
 	q.Status = strings.TrimSpace(q.Status)
+	q.PurchaseFrom = strings.TrimSpace(q.PurchaseFrom)
+	q.PurchaseTo = strings.TrimSpace(q.PurchaseTo)
 	q.Sort = strings.TrimSpace(q.Sort)
 	if strings.ToLower(strings.TrimSpace(q.Order)) == "asc" {
 		q.Order = "asc"

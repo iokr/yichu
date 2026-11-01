@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -67,6 +68,21 @@ func (r *StatsRepository) ByYear() ([]GroupRow, error) {
 		" GROUP BY t.purchase_year ORDER BY t.purchase_year DESC"
 	rows := make([]GroupRow, 0, 8)
 	if err := r.db.Raw(query).Scan(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
+// ByMonth 按购买年月统计指定年份的分布。
+// 年月同样先落到派生表再分组，避免 ONLY_FULL_GROUP_BY 报错。
+func (r *StatsRepository) ByMonth(year int) ([]GroupRow, error) {
+	const query = "SELECT CONCAT(t.purchase_year, '-', LPAD(t.purchase_month, 2, '0')) AS `key`, CONCAT(t.purchase_month, ' 月') AS label, COUNT(*) AS count, SUM(t.purchase_price) AS amount" +
+		" FROM (SELECT YEAR(items.purchase_date) AS purchase_year, MONTH(items.purchase_date) AS purchase_month, items.purchase_price AS purchase_price FROM items" +
+		" WHERE items.deleted_at IS NULL AND items.purchase_date >= ? AND items.purchase_date < ?) AS t" +
+		" GROUP BY t.purchase_year, t.purchase_month ORDER BY t.purchase_year ASC, t.purchase_month ASC"
+	start := time.Date(year, 1, 1, 0, 0, 0, 0, time.Local)
+	rows := make([]GroupRow, 0, 12)
+	if err := r.db.Raw(query, start, start.AddDate(1, 0, 0)).Scan(&rows).Error; err != nil {
 		return nil, err
 	}
 	return rows, nil

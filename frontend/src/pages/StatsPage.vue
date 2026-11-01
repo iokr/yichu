@@ -14,6 +14,7 @@ import {
   fetchByBrand,
   fetchByCategory,
   fetchByColor,
+  fetchByMonth,
   fetchBySeason,
   fetchByYear,
   fetchCostPerWear,
@@ -34,11 +35,17 @@ const overview = ref<StatsOverview | null>(null)
 const byCategory = ref<KeyStat[]>([])
 const byBrand = ref<KeyStat[]>([])
 const byYear = ref<KeyStat[]>([])
+const byMonth = ref<KeyStat[]>([])
 const bySeason = ref<CodeStat[]>([])
 const byColor = ref<CodeStat[]>([])
 const costPerWear = ref<CostPerWearItem[]>([])
 const loading = ref(true)
+const monthLoading = ref(false)
 const error = ref('')
+
+const monthYears = ref<number[]>([new Date().getFullYear()])
+const monthYear = ref(new Date().getFullYear())
+const monthTotal = computed(() => byMonth.value.reduce((sum, row) => sum + row.count, 0))
 
 const masked = computed(() => overview.value?.price_masked ?? false)
 
@@ -160,6 +167,52 @@ const yearOption = computed<EChartsOption>(() => {
   }
 })
 
+const monthOption = computed<EChartsOption>(() => {
+  const { colors, tooltip } = baseGrid()
+  const rows = byMonth.value
+  return {
+    grid: { left: 8, right: 16, top: 24, bottom: 8, containLabel: true },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      ...tooltip,
+      formatter: (params) => {
+        const items = Array.isArray(params) ? params : [params]
+        const index = Number((items[0] as { dataIndex?: number } | undefined)?.dataIndex ?? 0)
+        const row = rows[index]
+        if (!row) return ''
+        return row.amount === null
+          ? `${row.label}：${row.count} 件`
+          : `${row.label}：${row.count} 件<br/>${row.amount_display}`
+      },
+    },
+    xAxis: {
+      type: 'category',
+      data: rows.map((row) => row.label),
+      axisLine: { lineStyle: { color: colors.line } },
+      axisTick: { show: false },
+      axisLabel: { color: colors.text, fontSize: 10, interval: 0 },
+    },
+    yAxis: {
+      type: 'value',
+      minInterval: 1,
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: { lineStyle: { color: colors.split } },
+      axisLabel: { color: colors.text, fontSize: 11 },
+    },
+    series: [
+      {
+        type: 'bar',
+        barMaxWidth: 18,
+        data: rows.map((row) => row.count),
+        itemStyle: { color: chartPalette[1], borderRadius: [4, 4, 0, 0] },
+        label: { show: true, position: 'top', color: colors.text, fontSize: 10 },
+      },
+    ],
+  }
+})
+
 const seasonOption = computed<EChartsOption>(() => {
   const { colors, tooltip } = baseGrid()
   const rows = bySeason.value.filter((row) => row.count > 0)
@@ -226,6 +279,30 @@ const colorOption = computed<EChartsOption>(() => {
   }
 })
 
+function buildMonthYears(rows: KeyStat[]): number[] {
+  const years = new Set<number>([new Date().getFullYear()])
+  for (const row of rows) {
+    const year = Number(row.key)
+    if (Number.isInteger(year) && year > 0) years.add(year)
+  }
+  return [...years].sort((a, b) => b - a)
+}
+
+async function loadMonths(year: number) {
+  monthLoading.value = true
+  try {
+    byMonth.value = await fetchByMonth(year)
+  } catch {
+    byMonth.value = []
+  } finally {
+    monthLoading.value = false
+  }
+}
+
+function onMonthYearChange(year: number) {
+  void loadMonths(year)
+}
+
 async function load() {
   loading.value = true
   error.value = ''
@@ -246,6 +323,11 @@ async function load() {
     bySeason.value = season
     byColor.value = color
     costPerWear.value = cost
+
+    // 月度统计依赖年份列表：默认展示最近一年，避免空白图表。
+    monthYears.value = buildMonthYears(byYear.value)
+    monthYear.value = monthYears.value[0] ?? new Date().getFullYear()
+    await loadMonths(monthYear.value)
   } catch (err) {
     error.value = toErrorMessage(err)
   } finally {
@@ -356,21 +438,43 @@ onMounted(async () => {
       </AppCard>
 
       <AppCard padding="lg">
+        <div class="mb-2 flex items-center justify-between gap-2">
+          <h2 class="text-[15px] font-semibold">月度购买</h2>
+          <el-select v-model="monthYear" size="small" class="!w-[104px]" @change="onMonthYearChange">
+            <el-option v-for="year in monthYears" :key="year" :label="`${year} 年`" :value="year" />
+          </el-select>
+        </div>
+        <AppSkeleton v-if="loading || monthLoading" height="260px" />
+        <AppEmpty
+          v-else-if="!monthTotal"
+          compact
+          :title="`${monthYear} 年暂无购买记录`"
+          description="填写购买日期后即可按月统计。"
+        />
+        <template v-else>
+          <ChartBox :option="monthOption" :height="260" />
+          <p class="mt-2 text-[12px] text-ink-3">全年 {{ monthTotal }} 件</p>
+        </template>
+      </AppCard>
+    </div>
+
+    <div class="mt-4 grid gap-4 lg:grid-cols-2">
+      <AppCard padding="lg">
         <h2 class="mb-2 text-[15px] font-semibold">季节分布</h2>
         <AppSkeleton v-if="loading" height="260px" />
         <AppEmpty v-else-if="!bySeason.some((row) => row.count > 0)" compact title="暂无季节数据" description="给衣物标注季节后即可统计。" />
         <ChartBox v-else :option="seasonOption" :height="260" />
       </AppCard>
-    </div>
 
-    <div class="mt-4 grid gap-4 lg:grid-cols-2">
       <AppCard padding="lg">
         <h2 class="mb-2 text-[15px] font-semibold">颜色分布</h2>
         <AppSkeleton v-if="loading" height="260px" />
         <AppEmpty v-else-if="!byColor.some((row) => row.count > 0)" compact title="暂无颜色数据" description="给衣物选颜色后即可统计。" />
         <ChartBox v-else :option="colorOption" :height="260" />
       </AppCard>
+    </div>
 
+    <div class="mt-4">
       <AppCard padding="lg">
         <div class="mb-2 flex items-center justify-between">
           <h2 class="text-[15px] font-semibold">单次穿着成本</h2>

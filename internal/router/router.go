@@ -127,6 +127,7 @@ func New(cfg *config.Config, db *gorm.DB, logger *logx.Logger) *gin.Engine {
 			stats.GET("/by-category", h.StatsByCategory)
 			stats.GET("/by-brand", h.StatsByBrand)
 			stats.GET("/by-year", h.StatsByYear)
+			stats.GET("/by-month", h.StatsByMonth)
 			stats.GET("/by-season", h.StatsBySeason)
 			stats.GET("/by-color", h.StatsByColor)
 			stats.GET("/cost-per-wear", h.StatsCostPerWear)

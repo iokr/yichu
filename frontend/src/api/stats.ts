@@ -17,6 +17,10 @@ export function fetchByYear() {
   return get<KeyStat[]>('/stats/by-year')
 }
 
+export function fetchByMonth(year: number) {
+  return get<KeyStat[]>('/stats/by-month', { year })
+}
+
 export function fetchBySeason() {
   return get<CodeStat[]>('/stats/by-season')
 }

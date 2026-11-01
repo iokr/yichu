@@ -32,7 +32,11 @@ func (s *ItemService) masker() PriceMasker { return s.settings.Masker() }
 // List 分页查询衣物。
 func (s *ItemService) List(_ context.Context, q dto.ItemQuery) (*dto.PageResult[dto.ItemListItem], error) {
 	q.Normalize()
-	items, total, err := s.items.List(s.repoQuery(q))
+	query, err := s.repoQuery(q)
+	if err != nil {
+		return nil, err
+	}
+	items, total, err := s.items.List(query)
 	if err != nil {
 		return nil, errcode.Internal(err)
 	}
@@ -176,7 +180,18 @@ func (s *ItemService) Batch(_ context.Context, req dto.BatchRequest) error {
 	return nil
 }
 
-func (s *ItemService) repoQuery(q dto.ItemQuery) repository.ItemQuery {
+func (s *ItemService) repoQuery(q dto.ItemQuery) (repository.ItemQuery, error) {
+	purchaseFrom, err := parseDateParam("购买开始日期", q.PurchaseFrom)
+	if err != nil {
+		return repository.ItemQuery{}, err
+	}
+	purchaseTo, err := parseDateParam("购买结束日期", q.PurchaseTo)
+	if err != nil {
+		return repository.ItemQuery{}, err
+	}
+	if purchaseFrom != nil && purchaseTo != nil && purchaseTo.Before(*purchaseFrom) {
+		return repository.ItemQuery{}, errcode.Param("购买时间范围有误：结束日期不能早于开始日期")
+	}
 	return repository.ItemQuery{
 		CategoryID:    q.CategoryID,
 		SubCategoryID: q.SubCategoryID,
@@ -190,11 +205,13 @@ func (s *ItemService) repoQuery(q dto.ItemQuery) repository.ItemQuery {
 		MinPrice:      q.MinPrice,
 		MaxPrice:      q.MaxPrice,
 		Year:          q.Year,
+		PurchaseFrom:  purchaseFrom,
+		PurchaseTo:    purchaseTo,
 		Sort:          q.Sort,
 		Order:         q.Order,
 		Page:          q.Page,
 		Size:          q.Size,
-	}
+	}, nil
 }
 
 // prepare 校验请求并转换为模型，返回图片与标签。
@@ -352,6 +369,19 @@ func (s *ItemService) prepare(req dto.ItemRequest) (*model.Item, []model.ItemIma
 		Remark:          remark,
 	}
 	return item, images, tagNames, nil
+}
+
+// parseDateParam 解析可选的日期查询参数，空字符串表示不限制。
+func parseDateParam(field, raw string) (*time.Time, error) {
+	value := strings.TrimSpace(raw)
+	if value == "" {
+		return nil, nil
+	}
+	t, err := time.ParseInLocation(dateLayout, value, time.Local)
+	if err != nil {
+		return nil, errcode.Param("%s格式应为 YYYY-MM-DD", field)
+	}
+	return &t, nil
 }
 
 func limitedPtr(field, raw string, max int) (*string, error) {

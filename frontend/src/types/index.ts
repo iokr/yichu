@@ -224,6 +224,8 @@ export interface ItemQueryParams {
   min_price?: number
   max_price?: number
   year?: number
+  purchase_from?: string
+  purchase_to?: string
   sort?: string
   order?: 'asc' | 'desc'
   page?: number
